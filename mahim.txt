@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Happy Birthday!</title>
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+body{
+    font-family: 'Segoe UI', sans-serif;
+    min-height:100vh;
+    overflow:hidden;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    background:linear-gradient(135deg,#ff758c,#ff7eb3,#ffd86f);
+    position:relative;
+}
+
+/* Card */
+.card{
+    background:rgba(255,255,255,0.15);
+    backdrop-filter:blur(12px);
+    border-radius:25px;
+    padding:30px 25px;
+    width:90%;
+    max-width:450px;
+    text-align:center;
+    color:white;
+    box-shadow:0 10px 30px rgba(0,0,0,0.2);
+    animation:popIn 1s ease;
+    z-index:10;
+}
+
+@keyframes popIn{
+    from{
+        transform:scale(0.5);
+        opacity:0;
+    }
+    to{
+        transform:scale(1);
+        opacity:1;
+    }
+}
+
+h1{
+    font-size:2.5rem;
+    margin-bottom:10px;
+}
+
+.cake{
+    font-size:4rem;
+    animation:bounce 1.5s infinite;
+}
+
+@keyframes bounce{
+    0%,100%{transform:translateY(0);}
+    50%{transform:translateY(-10px);}
+}
+
+.message{
+    margin-top:15px;
+    font-size:1.1rem;
+    line-height:1.7;
+}
+
+.name{
+    color:#fff7a5;
+    font-weight:bold;
+}
+
+.btn{
+    margin-top:25px;
+    padding:12px 24px;
+    border:none;
+    border-radius:50px;
+    background:white;
+    color:#ff4f81;
+    font-size:1rem;
+    font-weight:bold;
+    cursor:pointer;
+    transition:0.3s;
+}
+
+.btn:hover{
+    transform:scale(1.05);
+}
+
+/* Balloons */
+.balloon{
+    position:absolute;
+    bottom:-120px;
+    width:60px;
+    height:75px;
+    border-radius:50%;
+    animation:floatUp linear infinite;
+}
+
+.balloon::after{
+    content:"";
+    position:absolute;
+    left:50%;
+    top:75px;
+    width:2px;
+    height:60px;
+    background:white;
+}
+
+.red{background:#ff4d6d;}
+.blue{background:#4d96ff;}
+.yellow{background:#ffd93d;}
+.green{background:#6bcB77;}
+
+@keyframes floatUp{
+    from{
+        transform:translateY(0);
+    }
+    to{
+        transform:translateY(-120vh);
+    }
+}
+
+canvas{
+    position:fixed;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+    pointer-events:none;
+}
+
+/* Mobile */
+@media(max-width:600px){
+    h1{
+        font-size:2rem;
+    }
+
+    .cake{
+        font-size:3rem;
+    }
+
+    .message{
+        font-size:1rem;
+    }
+}
+</style>
+</head>
+<body>
+
+<canvas id="confetti"></canvas>
+
+<!-- Balloons -->
+<div class="balloon red" style="left:10%; animation-duration:12s;"></div>
+<div class="balloon blue" style="left:30%; animation-duration:10s;"></div>
+<div class="balloon yellow" style="left:55%; animation-duration:14s;"></div>
+<div class="balloon green" style="left:80%; animation-duration:11s;"></div>
+
+<div class="card">
+    <div class="cake">🎂</div>
+
+    <h1>Happy Birthday!</h1>
+
+    <p class="message">
+        Dear <span class="name">Best Friend</span>, ❤️<br><br>
+        Wishing you a day filled with happiness,
+        laughter, love, and unforgettable memories.
+        May all your dreams come true and your year
+        be filled with success and joy. 🎉✨
+    </p>
+
+    <button class="btn" onclick="burstConfetti()">
+        Celebrate 🎊
+    </button>
+</div>
+
+<script>
+const canvas = document.getElementById("confetti");
+const ctx = canvas.getContext("2d");
+
+function resizeCanvas(){
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+}
+resizeCanvas();
+window.addEventListener("resize", resizeCanvas);
+
+let confetti = [];
+
+function createConfetti(count = 150){
+    for(let i=0;i<count;i++){
+        confetti.push({
+            x: Math.random()*canvas.width,
+            y: Math.random()*canvas.height - canvas.height,
+            r: Math.random()*6 + 3,
+            d: Math.random()*count,
+            color: `hsl(${Math.random()*360},100%,60%)`,
+            tilt: Math.random()*10 - 10,
+            tiltAngleIncremental: Math.random()*0.08 + 0.05,
+            tiltAngle: 0
+        });
+    }
+}
+
+createConfetti();
+
+function drawConfetti(){
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+
+    confetti.forEach(c=>{
+        ctx.beginPath();
+        ctx.lineWidth = c.r;
+        ctx.strokeStyle = c.color;
+        ctx.moveTo(c.x + c.tilt + c.r/2, c.y);
+        ctx.lineTo(c.x + c.tilt, c.y + c.tilt + c.r/2);
+        ctx.stroke();
+    });
+
+    updateConfetti();
+    requestAnimationFrame(drawConfetti);
+}
+
+function updateConfetti(){
+    confetti.forEach((c,index)=>{
+        c.tiltAngle += c.tiltAngleIncremental;
+        c.y += 2 + Math.random()*2;
+        c.x += Math.sin(c.tiltAngle);
+        c.tilt = Math.sin(c.tiltAngle) * 15;
+
+        if(c.y > canvas.height){
+            confetti[index] = {
+                ...c,
+                x: Math.random()*canvas.width,
+                y: -20
+            };
+        }
+    });
+}
+
+function burstConfetti(){
+    createConfetti(100);
+}
+
+drawConfetti();
+</script>
+
+</body>
+</html>
